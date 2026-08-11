@@ -1,33 +1,50 @@
 let charts = {};
 let selectedMinerId = null;
+let audioCtx = null;
 
-// Audio Siren Trigger (Web Audio API Synth)
 function playAudioAlarm() {
     try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Unlock Web Audio API context on browser interaction
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(800, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.3);
+        osc.stop(audioCtx.currentTime + 0.3);
     } catch(e) { 
-        console.log("Audio alert suppressed by browser interaction policy.", e); 
+        console.log("Audio waiting for user click.", e); 
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Enable audio context on first click anywhere on page
+    document.body.addEventListener('click', () => {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }, { once: true });
+
     updateClock();
     setInterval(updateClock, 1000);
 
     fetchMiners();
     fetchAlerts();
 
-    // Poll endpoint every 2.5 seconds
     setInterval(() => {
         fetchMiners();
         fetchAlerts();

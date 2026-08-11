@@ -8,7 +8,6 @@ import joblib
 def generate_synthetic_data(num_samples=8000):
     np.random.seed(42)
     
-    # Generate continuous baseline features
     methane_ppm = np.random.uniform(0, 1500, num_samples)
     co_ppm = np.random.uniform(0, 300, num_samples)
     heart_rate_bpm = np.random.uniform(55, 150, num_samples)
@@ -17,17 +16,13 @@ def generate_synthetic_data(num_samples=8000):
     labels = []
     
     for m, c, hr, temp in zip(methane_ppm, co_ppm, heart_rate_bpm, body_temp_c):
-        # High Risk Rules
         if (m > 1000 and hr > 120) or (c > 200) or (temp > 39.0 and hr > 130) or (m > 1200):
             base_label = 2  # High Risk
-        # Medium Risk Rules
         elif (m > 500) or (c > 100) or (hr > 110) or (temp > 38.0):
             base_label = 1  # Medium Risk
-        # Low Risk Rules
         else:
             base_label = 0  # Low Risk
             
-        # Add ~5% noise/jitter to simulate unobserved real-world complexity
         if np.random.rand() < 0.05:
             base_label = np.random.choice([0, 1, 2])
             

@@ -1,6 +1,7 @@
 import sqlite3
 import joblib
 import numpy as np
+import pandas as pd
 import csv
 import io
 import random
@@ -22,7 +23,14 @@ except Exception as e:
     print("[!] Failed to load risk_model.pkl. Run `python train_model.py` first.")
 
 def compute_risk(methane, co, hr, temp):
-    features = np.array([[methane, co, hr, temp]])
+    # Pass features as DataFrame with matching column names to eliminate scikit-learn warnings
+    features = pd.DataFrame([{
+        'methane_ppm': methane,
+        'co_ppm': co,
+        'heart_rate_bpm': hr,
+        'body_temp_c': temp
+    }])
+    
     probabilities = risk_model.predict_proba(features)[0]
     
     # Continuous metric calculation derived from class probabilities
@@ -59,7 +67,6 @@ def process_latest_readings_and_alerts():
     conn = sqlite3.connect('miner_safety.db')
     cursor = conn.cursor()
     
-    # Fetch latest reading for each miner
     cursor.execute('''
         SELECT r.miner_id, r.methane_ppm, r.co_ppm, r.heart_rate_bpm, r.body_temp_c, r.timestamp
         FROM readings r
@@ -74,7 +81,6 @@ def process_latest_readings_and_alerts():
         score, status, action = compute_risk(methane, co, hr, temp)
 
         if status in ['warning', 'critical']:
-            # Check last logged alert to prevent duplicate flood (log every 10 secs max per miner)
             cursor.execute('''
                 SELECT timestamp FROM alerts WHERE miner_id = ? ORDER BY id DESC LIMIT 1
             ''', (m_id,))
@@ -234,7 +240,6 @@ def reset_simulation():
     conn.commit()
     conn.close()
     
-    # Reset simulator memory state back to nominal baselines
     simulator.incident_triggers.clear()
     for m_id in simulator.sensor_state:
         simulator.sensor_state[m_id] = {
@@ -246,5 +251,4 @@ def reset_simulation():
     return jsonify({'status': 'reset complete'})
 
 if __name__ == '__main__':
-    # Binding host to '0.0.0.0' allows external network requests
     app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
