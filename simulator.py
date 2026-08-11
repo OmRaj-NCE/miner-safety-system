@@ -14,7 +14,6 @@ INITIAL_MINERS = [
     (6, 'Jamal Kwame', 'Zone C')
 ]
 
-# Track active incident scenarios: { miner_id: step_counter }
 incident_triggers = {}
 
 def init_db():
@@ -60,7 +59,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Latest state memory for small random walk fluctuations
 sensor_state = {
     m[0]: {
         'methane': random.uniform(10, 40),
@@ -84,17 +82,16 @@ def generate_sensor_tick():
 
         if m_id in incident_triggers:
             step = incident_triggers[m_id]
-            # Ramp parameters gradually over ~30 seconds (10 ticks x 3s)
-            state['methane'] += random.uniform(80, 140)
-            state['co'] += random.uniform(18, 30)
-            state['hr'] += random.uniform(4, 8)
-            state['temp'] += random.uniform(0.15, 0.3)
+            # Rapid aggressive jump on first 2 ticks to trigger high risk immediately
+            state['methane'] += random.uniform(400, 600)
+            state['co'] += random.uniform(90, 130)
+            state['hr'] += random.uniform(20, 35)
+            state['temp'] += random.uniform(0.8, 1.4)
             
             incident_triggers[m_id] += 1
-            if step > 20: # Cap at high extreme
+            if step > 10:
                 incident_triggers.pop(m_id, None)
         else:
-            # Gentle random walk around normal baseline
             state['methane'] = max(0, min(80, state['methane'] + random.uniform(-2, 2)))
             state['co'] = max(0, min(15, state['co'] + random.uniform(-0.5, 0.5)))
             state['hr'] = max(55, min(100, state['hr'] + random.uniform(-1.5, 1.5)))

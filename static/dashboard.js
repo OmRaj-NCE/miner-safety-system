@@ -8,7 +8,6 @@ function playAudioAlarm() {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
         
-        // Resume AudioContext if browser suspended autoplay
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
@@ -16,22 +15,22 @@ function playAudioAlarm() {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
         
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+        osc.stop(audioCtx.currentTime + 0.25);
     } catch(e) { 
         console.error("Audio playback error:", e); 
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Unlock Audio Context on first click anywhere on the page
+    // Enable audio context on any user click
     document.body.addEventListener('click', () => {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -47,14 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMiners();
     fetchAlerts();
 
-    // Poll endpoint every 2.5 seconds
+    // Fast 1-second interval refresh for instant response
     setInterval(() => {
         fetchMiners();
         fetchAlerts();
         if (selectedMinerId) {
             updateModalCharts(selectedMinerId);
         }
-    }, 2500);
+    }, 1000);
 });
 
 function updateClock() {
@@ -217,8 +216,12 @@ function renderAnalyticsTable(alerts) {
 async function simulateIncident(event, minerId) {
     event.stopPropagation();
     try {
+        // Play immediate audio click feedback
+        playAudioAlarm();
         await fetch(`/api/simulate-incident/${minerId}`, { method: "POST" });
-        fetchMiners();
+        // Immediate UI refresh without waiting for polling interval
+        await fetchMiners();
+        await fetchAlerts();
     } catch (err) {
         console.error("Failed initiating incident:", err);
     }
