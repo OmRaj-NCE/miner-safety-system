@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardianMine — AI Safety & Risk Command Center</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo-area">
+            <span class="status-beacon"></span>
+            <h1>GUARDIAN<span>MINE</span></h1>
+            <span class="subtitle">AI Underground Safety Command</span>
+        </div>
+        <div class="header-right">
+            <button onclick="resetSystem()" class="btn-simulate" style="width: auto; background: #2a3446; border-color: #3b485e;">🔄 Reset All</button>
+            <div id="system-status-badge" class="badge badge-normal">MINE STATUS: NOMINAL</div>
+            <div id="clock">00:00:00 UTC</div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Main Panel: Spatial Map & Miner Grid -->
+        <main class="main-content">
+            <!-- Zone Spatial Risk Map -->
+            <section class="map-section">
+                <h2>Zone Spatial Risk Map</h2>
+                <div class="zone-grid">
+                    <div id="zone-A" class="zone-card normal">
+                        <span class="zone-label">ZONE A (Sector 1)</span>
+                        <div class="zone-miners" id="miners-zone-A">Active Personnel: 0</div>
+                        <div class="zone-hazard" id="hazard-zone-A">Hazard: NOMINAL</div>
+                    </div>
+                    <div id="zone-B" class="zone-card normal">
+                        <span class="zone-label">ZONE B (Sector 2)</span>
+                        <div class="zone-miners" id="miners-zone-B">Active Personnel: 0</div>
+                        <div class="zone-hazard" id="hazard-zone-B">Hazard: NOMINAL</div>
+                    </div>
+                    <div id="zone-C" class="zone-card normal">
+                        <span class="zone-label">ZONE C (Sector 3)</span>
+                        <div class="zone-miners" id="miners-zone-C">Active Personnel: 0</div>
+                        <div class="zone-hazard" id="hazard-zone-C">Hazard: NOMINAL</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Personnel Monitor Header -->
+            <div class="section-header">
+                <h2>Active Personnel Monitor</h2>
+                <div class="summary-pills">
+                    <span id="count-normal" class="pill pill-green">6 Normal</span>
+                    <span id="count-warning" class="pill pill-yellow">0 Warning</span>
+                    <span id="count-critical" class="pill pill-red">0 Critical</span>
+                </div>
+            </div>
+
+            <!-- Personnel Cards Grid -->
+            <div id="miner-grid" class="miner-grid"></div>
+
+            <!-- Historical Analytics View -->
+            <section class="analytics-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Historical Analytics & Incident Registry</h2>
+                    <a href="/api/export-alerts" download class="btn-simulate" style="width: auto; padding: 6px 14px; text-decoration: none; display: inline-block;">📥 Export CSV Report</a>
+                </div>
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Log ID</th>
+                            <th>Timestamp</th>
+                            <th>Miner Name</th>
+                            <th>Zone</th>
+                            <th>Risk Score</th>
+                            <th>Severity</th>
+                            <th>Recommended Action Taken</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analytics-tbody">
+                        <tr><td colspan="7" class="placeholder">Awaiting incident logs...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <!-- Right Side Feed: Realtime Alert Stream -->
+        <aside class="sidebar">
+            <h2>Live Alert Feed</h2>
+            <div id="alert-feed" class="alert-feed"></div>
+        </aside>
+    </div>
+
+    <!-- Telemetry Detail Modal -->
+    <div id="miner-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modal-miner-name">Miner Details</h2>
+                    <span id="modal-miner-zone" class="zone-tag">--</span>
+                </div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="modal-action-box" class="action-box">
+                    <strong>Recommended Action:</strong> <span id="modal-action-text">--</span>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Methane Concentration (PPM)</h3>
+                        <canvas id="chart-methane"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Carbon Monoxide (PPM)</h3>
+                        <canvas id="chart-co"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Heart Rate (BPM)</h3>
+                        <canvas id="chart-hr"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Body Temperature (°C)</h3>
+                        <canvas id="chart-temp"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>
