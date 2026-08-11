@@ -23,7 +23,7 @@ except Exception as e:
     print("[!] Failed to load risk_model.pkl. Run `python train_model.py` first.")
 
 def compute_risk(methane, co, hr, temp):
-    # Pass features as DataFrame with matching column names to eliminate scikit-learn warnings
+    # Pass features as DataFrame with explicit column names to eliminate scikit-learn warnings
     features = pd.DataFrame([{
         'methane_ppm': methane,
         'co_ppm': co,
@@ -116,6 +116,10 @@ scheduler.start()
 def index():
     return render_template('index.html')
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 @app.route('/api/miners')
 def get_miners():
     conn = sqlite3.connect('miner_safety.db')
@@ -205,6 +209,8 @@ def get_alerts():
 @app.route('/api/simulate-incident/<int:miner_id>', methods=['POST'])
 def trigger_incident_route(miner_id):
     simulator.trigger_incident(miner_id)
+    # Force an immediate sensor tick so frontend metrics shift instantly
+    background_task()
     return jsonify({'status': 'success', 'message': f'Incident sequence initiated for Miner #{miner_id}'})
 
 @app.route('/api/export-alerts')

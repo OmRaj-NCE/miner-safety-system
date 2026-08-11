@@ -8,7 +8,7 @@ function playAudioAlarm() {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
         
-        // Unlock Web Audio API context on browser interaction
+        // Resume AudioContext if browser suspended autoplay
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
@@ -18,18 +18,20 @@ function playAudioAlarm() {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
     } catch(e) { 
-        console.log("Audio waiting for user click.", e); 
+        console.error("Audio playback error:", e); 
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Enable audio context on first click anywhere on page
+    // Unlock Audio Context on first click anywhere on the page
     document.body.addEventListener('click', () => {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMiners();
     fetchAlerts();
 
+    // Poll endpoint every 2.5 seconds
     setInterval(() => {
         fetchMiners();
         fetchAlerts();
