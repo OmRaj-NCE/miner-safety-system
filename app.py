@@ -234,7 +234,7 @@ def export_alerts():
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-disposition": "attachment; filename=miner_safety_incidents.csv"}
+        headers={"Content-disposition": "attachment; filename=mineguard_ai_incidents.csv"}
     )
 
 @app.route('/api/reset-simulation', methods=['POST'])
